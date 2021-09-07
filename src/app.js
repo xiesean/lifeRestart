@@ -1,7 +1,7 @@
 import { max, sum } from './functions/util.js';
 import { summary } from './functions/summary.js'
 import Life from './life.js'
-import domtoimage from 'dom-to-image';
+
 class App{
     constructor(){
         this.#life = new Life();
@@ -15,11 +15,17 @@ class App{
     #isEnd = false;
     #selectedExtendTalent = null;
     #hintTimeout;
+    #specialthanks;
 
     async initial() {
         this.initPages();
         this.switch('loading');
-        await this.#life.initial();
+        const [,specialthanks] = await Promise.all([
+            this.#life.initial(),
+            json('specialthanks')
+        ]);
+        this.#specialthanks = specialthanks;
+        console.table(specialthanks);
         this.switch('index');
         window.onerror = (event, source, lineno, colno, error) => {
             this.hint(`[ERROR] at (${source}:${lineno}:${colno})\n\n${error?.stack||error||'unknow Error'}`, 'error');
@@ -51,6 +57,7 @@ class App{
         <div id="main">
             <div id="cnt" class="head">已重开1次</div>
             <button id="rank">排行榜</button>
+            <button id="specialthanks">特别感谢</button>
             <button id="themeToggleBtn">黑</button>
             <div id="title">
                 人生重开模拟器<br>
@@ -82,6 +89,25 @@ class App{
 
                 this.setTheme(localStorage.getItem('theme'))
             });
+
+        indexPage
+            .find('#specialthanks')
+            .click(()=>this.switch('specialthanks'));
+
+        const specialThanksPage = $(`
+        <div id="main">
+            <button id="specialthanks">返回</button>
+            <div id="spthx">
+                <ul class="g1"></ul>
+                <ul class="g2"></ul>
+            </div>
+            <button id="sponsor" onclick="window.open('https://afdian.net/@LifeRestart')">打赏作者</button>
+        </div>
+        `);
+
+        specialThanksPage
+            .find('#specialthanks')
+            .click(()=>this.switch('index'));
 
         // Talent
         const talentPage = $(`
@@ -356,7 +382,7 @@ class App{
                         if(ua.match(/MicroMessenger/i)=="micromessenger") {
                             $('#endImage').attr('src', dataUrl);
                         }
-                        
+
                     });
             })
         trajectoryPage
@@ -384,7 +410,7 @@ class App{
             <button id="again" class="mainbtn" style="top:auto; bottom:0.1em"><span class="iconfont">&#xe6a7;</span>再次重开</button>
         </div>
         `);
-            
+
         summaryPage
             .find('#again')
             .click(()=>{
@@ -404,7 +430,6 @@ class App{
                     this.#currentPage = 'loading';
                 },
             },
-
             index: {
                 page: indexPage,
                 btnRank: indexPage.find('#rank'),
@@ -431,6 +456,25 @@ class App{
                     btnRank.hide();
                     cnt.hide();
                 },
+            },
+            specialthanks: {
+                page: specialThanksPage,
+                clear: () => {
+                    const groups = [
+                        specialThanksPage.find('#spthx > ul.g1'),
+                        specialThanksPage.find('#spthx > ul.g2'),
+                    ];
+                    groups.forEach(g=>g.empty());
+                    Object
+                        .values(this.#specialthanks)
+                        .sort(()=>0.5-Math.random())
+                        .forEach(({group, name, comment})=>groups[--group].append(`
+                            <li>
+                                <span class="name">${name}</span>
+                                <span class="comment">${comment||''}</span>
+                            </li>
+                        `))
+                }
             },
             talent: {
                 page: talentPage,
@@ -551,7 +595,7 @@ class App{
                         })(),
                     ].join(''));
                 }
-            }
+            },
         }
     }
 
