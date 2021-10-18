@@ -108,3 +108,6 @@ utils/xlsxTransform-*
 /.idea
 
 __localStorage.json
+
+yarn.lock
+package-lock.json

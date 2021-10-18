@@ -33,6 +33,10 @@ Or
 npm install
 ```
 
+```bash
+npm run build  (打包)
+```
+
 3. Start local server.
 
 ```bash

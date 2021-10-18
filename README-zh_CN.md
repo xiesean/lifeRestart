@@ -33,6 +33,11 @@ yarn install
 npm install
 ```
 
+
+```bash
+npm run build  (打包)
+```
+
 3. 启动本地服务器。
 
 ```bash
